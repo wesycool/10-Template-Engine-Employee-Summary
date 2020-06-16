@@ -10,20 +10,32 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+const divider = '-'.repeat(50)
+
 async function main(){
+    
     await inquirer.prompt({message:'Would you like to create a new team?', name:'create', type:'confirm'})
     .then(async function(team){
+        //Create Team
         if(team.create){
+            let teamList = []
             const manager = await staffInput('Manager')
+            teamList.push(new Manager(1, manager.name, manager.email, manager.officeNumber))
 
+            // Get Team Members
             for (let i = 0; i < manager.staff; i++){
-                await inquirer.prompt({message:`Choose team member ${i+1}:`, name:'member', type:'list', choices:['Engineer','Intern']})
+                console.log(divider)
+                await inquirer.prompt({message:`Choose staff member ${i+1}:`, name:'member', type:'list', choices:['Engineer','Intern']})
                 .then(async function(staff){
                     const staffMember = await staffInput(staff.member)
-                    console.log(staffMember)
+                    const staffClass = eval(`new ${staff.member}(${i+2},'${staffMember.name}','${staffMember.email}','${(staff.member=='Engineer')? staffMember.github : staffMember.school}')`)
+                    teamList.push(staffClass)
                 })
             }
-        }      
+
+            fs.writeFileSync( outputPath, render(teamList))
+        }
+        console.log(`${divider}${team.create? `\nSuccess! Team has been created.`:''}\nThank you and have a nice day!\n`)
     })
 }
 
@@ -33,36 +45,13 @@ async function staffInput(member){
     const staffInput = await inquirer.prompt([
         { message: `${member} name:`, name:'name', type:'input'},
         { message: `${member} email:`, name:'email', type:'input'},
-        { message: `${member} GitHub username:`, name: 'github', type:'input', when: staff => member == 'Engineer'}, 
-        { message: `${member} school:`, name: 'school', type:'input', when: staff => member == 'Intern'},
-        { message: `${member} office number:`, name: 'officeNumber', type:'number', when: staff => member == 'Manager'},
-        { message: staff => `How many staff(s) under ${staff.name}?`, name:'staff', type:'number', when: staff => member == 'Manager'}    
+        { message: `${member} GitHub username:`, name: 'github', type:'input', when: member == 'Engineer'}, 
+        { message: `${member} school:`, name: 'school', type:'input', when: member == 'Intern'},
+        { message: `${member} office number:`, name: 'officeNumber', type:'number', when: member == 'Manager'},
+        { message: staff => `How many staff(s) under manager ${staff.name}?`, name:'staff', type:'number', when: member == 'Manager'}    
     ])
     return staffInput
 }
 
-//Run App
+// Run App
 main()
-
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
-
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
