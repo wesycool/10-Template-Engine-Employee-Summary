@@ -10,6 +10,39 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+async function main(){
+    await inquirer.prompt({message:'Would you like to create a new team?', name:'create', type:'confirm'})
+    .then(async function(team){
+        if(team.create){
+            const manager = await staffInput('Manager')
+
+            for (let i = 0; i < manager.staff; i++){
+                await inquirer.prompt({message:`Choose team member ${i+1}:`, name:'member', type:'list', choices:['Engineer','Intern']})
+                .then(async function(staff){
+                    const staffMember = await staffInput(staff.member)
+                    console.log(staffMember)
+                })
+            }
+        }      
+    })
+}
+
+
+// Staff Input Function
+async function staffInput(member){
+    const staffInput = await inquirer.prompt([
+        { message: `${member} name:`, name:'name', type:'input'},
+        { message: `${member} email:`, name:'email', type:'input'},
+        { message: `${member} GitHub username:`, name: 'github', type:'input', when: staff => member == 'Engineer'}, 
+        { message: `${member} school:`, name: 'school', type:'input', when: staff => member == 'Intern'},
+        { message: `${member} office number:`, name: 'officeNumber', type:'number', when: staff => member == 'Manager'},
+        { message: staff => `How many staff(s) under ${staff.name}?`, name:'staff', type:'number', when: staff => member == 'Manager'}    
+    ])
+    return staffInput
+}
+
+//Run App
+main()
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
