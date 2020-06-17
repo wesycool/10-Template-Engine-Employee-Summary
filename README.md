@@ -13,6 +13,8 @@ Node.js and npm install
 ## Usage
 Run node app.js on batch and input information about the team
 
+[![Screenshot](./screenshot.png)](./zoom_0.mp4)
+
 ## License
 MIT License
 
